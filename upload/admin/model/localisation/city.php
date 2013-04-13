@@ -104,7 +104,7 @@ class ModelLocalisationCity extends Model {
 			$this->db->query("CREATE TABLE `" . DB_PREFIX . "city` (`city_id` int(11) NOT NULL AUTO_INCREMENT, `zone_id` int(11) NOT NULL, `name` varchar(128) NOT NULL, `status` tinyint(1) NOT NULL DEFAULT '1', `sort_order` int(3) NOT NULL DEFAULT '0', PRIMARY KEY (`city_id`)) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;");
 
 			$this->db->query(
-				"INSERT INTO `oc_city` (`city_id`, `zone_id`, `name`, `status`) VALUES
+				"INSERT INTO `" . DB_PREFIX . "city` (`city_id`, `zone_id`, `name`, `status`) VALUES
 				(1, 1507, 'Kab. Aceh Barat', 1),
 				(2, 1507, 'Kab. Aceh Barat Daya', 1),
 				(3, 1507, 'Kab. Aceh Besar', 1),
