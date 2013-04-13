@@ -1,0 +1,1124 @@
+<modification>
+	<id>Select City</id>
+	<version>1.0.0</version>
+	<vqmver>2.3.2</vqmver>
+	<author>http://www.opencart-id.com/</author>
+
+	<!-- City admin header menu start -->
+	<file name="admin/controller/common/header.php">
+		<operation info="Insert City menu in admin">
+			<search position="after"><![CDATA[
+			$this->data['zone'] = $this->url->link('localisation/zone', 'token=' . $this->session->data['token'], 'SSL');
+			]]></search>
+			<add><![CDATA[
+			$this->data['text_city'] = $this->language->get('text_city');
+			$this->data['city'] = $this->url->link('localisation/city', 'token=' . $this->session->data['token'], 'SSL');
+			]]></add>
+		</operation>
+	</file>
+
+	<file name="admin/view/template/common/header.tpl">
+		<operation info="Insert City menu in admin">
+			<search position="after"><![CDATA[
+			  <li><a href="<?php echo $zone; ?>"><?php echo $text_zone; ?></a></li>
+			]]></search>
+			<add><![CDATA[
+			  <li><a href="<?php echo $city; ?>"><?php echo $text_city; ?></a></li>
+			]]></add>
+		</operation>
+	</file>
+
+	<file name="admin/language/indonesia/common/header.php">
+		<operation info="Insert City menu in admin">
+			<search position="before"><![CDATA[
+?>
+			]]></search>
+			<add><![CDATA[
+$_['text_city']						= 'Kota';
+			]]></add>
+		</operation>
+	</file>
+
+	<file name="admin/language/english/common/header.php">
+		<operation info="Insert City menu in admin">
+			<search position="before"><![CDATA[
+?>
+			]]></search>
+			<add><![CDATA[
+$_['text_city']						= 'Cities';
+			]]></add>
+		</operation>
+	</file>
+	<!-- City admin header menu end -->
+
+	<!-- add/edit customer via admin start -->
+	<file name="admin/controller/sale/customer.php">
+		<operation info="Add AJAX Response">
+			<search position="before"><![CDATA[
+	public function address() {
+			]]></search>
+			<add><![CDATA[
+	public function zone() {
+		$json = array();
+
+		$this->load->model('localisation/zone');
+
+		$zone_info = $this->model_localisation_zone->getZone($this->request->get['zone_id']);
+
+		if ($zone_info) {
+			$this->load->model('localisation/city');
+
+			$json = array(
+				'zone_id'	=> $zone_info['zone_id'],
+				'name'		=> $zone_info['name'],
+				'city'		=> $this->model_localisation_city->getCitiesByZoneId($this->request->get['zone_id']),
+				'status'	=> $zone_info['status']
+			);
+		}
+
+		$this->response->setOutput(json_encode($json));
+	}
+			]]></add>
+		</operation>
+	</file>
+
+	<file name="admin/view/template/sale/customer_form.tpl">
+		<operation info="Remove city field">
+			<search position="replace" offset="8"><![CDATA[
+				<td><input type="text" name="address[<?php echo $address_row; ?>][address_2]" value="<?php echo $address['address_2']; ?>" /></td>
+			]]></search>
+			<add><![CDATA[
+				<td><input type="text" name="address[<?php echo $address_row; ?>][address_2]" value="<?php echo $address['address_2']; ?>" /></td>
+			  </tr>
+			]]></add>
+		</operation>
+
+		<operation info="Change city text field to select and place it after zone">
+			<search position="after" offset="2"><![CDATA[
+				  <span class="error"><?php echo $error_address_zone[$address_row]; ?></span>
+			]]></search>
+			<add><![CDATA[
+			  <tr>
+				<td><span class="required">*</span> <?php echo $entry_city; ?></td>
+				<td><select name="address[<?php echo $address_row; ?>][city]"><option value=""><?php echo $text_select; ?></option></select>
+				  <?php if (isset($error_address_city[$address_row])) { ?>
+				  <span class="error"><?php echo $error_address_city[$address_row]; ?></span>
+				  <?php } ?></td>
+			  </tr>
+			]]></add>
+		</operation>
+
+		<operation info="Add onchange attribute in zone select">
+			<search position="replace"><![CDATA[
+				<td><select name="address[<?php echo $address_row; ?>][zone_id]">
+			]]></search>
+			<add><![CDATA[
+				<td><select name="address[<?php echo $address_row; ?>][zone_id]" onchange="zone(this, '<?php echo $address_row; ?>', '<?php echo $address['city']; ?>');">
+			]]></add>
+		</operation>
+
+		<operation info="Call zone function after country function is triggered">
+			<search position="after"><![CDATA[
+				$('select[name=\'address[' + index + '][zone_id]\']').html(html);
+			]]></search>
+			<add><![CDATA[
+				$('select[name$=\'[zone_id]\']').trigger('change');
+			]]></add>
+		</operation>
+
+		<operation info="Add AJAX change city based on selected zone">
+			<search position="after" offset="1"><![CDATA[
+$('select[name$=\'[country_id]\']').trigger('change');
+			]]></search>
+			<add><![CDATA[
+<script type="text/javascript"><!--
+function zone(element, index, city) {
+  if (element.value != '') {
+		$.ajax({
+			url: 'index.php?route=sale/customer/zone&token=<?php echo $token; ?>&zone_id=' + element.value,
+			dataType: 'json',
+			beforeSend: function() {
+				$('select[name=\'address[' + index + '][zone_id]\']').after('<span class="wait">&nbsp;<img src="view/image/loading.gif" alt="" /></span>');
+			},
+			complete: function() {
+				$('.wait').remove();
+			},
+			success: function(json) {
+				html = '<option value=""><?php echo $text_select; ?></option>';
+
+				if (json['city'] != '') {
+					for (i = 0; i < json['city'].length; i++) {
+						html += '<option value="' + json['city'][i]['name'] + '"';
+
+						if (json['city'][i]['name'] == city) {
+							html += ' selected="selected"';
+						}
+
+						html += '>' + json['city'][i]['name'] + '</option>';
+					}
+				} else {
+					html += '<option value="0"><?php echo $text_none; ?></option>';
+				}
+
+				$('select[name=\'address[' + index + '][city]\']').html(html);
+			},
+			error: function(xhr, ajaxOptions, thrownError) {
+				alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+			}
+		});
+	}
+}
+
+$('select[name$=\'[zone_id]\']').trigger('change');
+//--></script>
+			]]></add>
+		</operation>
+
+		<operation info="Remove city field in addAddress function">
+			<search position="replace" offset="5"><![CDATA[
+	html += '	  <td><input type="text" name="address[' + address_row + '][address_2]" value="" /></td>';
+			]]></search>
+			<add><![CDATA[
+	html += '	  <td><input type="text" name="address[' + address_row + '][address_2]" value="" /></td>';
+	html += '	</tr>';
+			]]></add>
+		</operation>
+
+		<operation info="Add onchange attribute in zone select">
+			<search position="replace"><![CDATA[
+html += '	  <td><select name="address[' + address_row + '][zone_id]"><option value="false"><?php echo $this->language->get('text_none'); ?></option></select></td>';
+			]]></search>
+			<add><![CDATA[
+html += '	  <td><select name="address[' + address_row + '][zone_id]" onchange="zone(this, \'' + address_row + '\', \'0\');"><option value="false"><?php echo $this->language->get('text_none'); ?></option></select></td>';
+			]]></add>
+		</operation>
+
+		<operation info="Change city text field to select and place it after zone in addAddress function">
+			<search position="before" offset="1"><![CDATA[
+	html += '	  <td><?php echo $entry_default; ?></td>';
+			]]></search>
+			<add><![CDATA[
+	html += '	<tr>';
+	html += '	  <td><span class="required">*</span> <?php echo $entry_city; ?></td>';
+	html += '	  <td><select name="address[' + address_row + '][city]"><option value="false"><?php echo $this->language->get('text_none'); ?></option></select></td>';
+	html += '	</tr>';
+			]]></add>
+		</operation>
+	</file>
+	<!-- add/edit customer via admin end -->
+
+	<!-- add/edit affiliate via admin start -->
+	<file name="admin/controller/sale/affiliate.php">
+		<operation info="Add AJAX Response">
+			<search position="before"><![CDATA[
+	public function transaction() {
+			]]></search>
+			<add><![CDATA[
+	public function zone() {
+		$json = array();
+
+		$this->load->model('localisation/zone');
+
+		$zone_info = $this->model_localisation_zone->getZone($this->request->get['zone_id']);
+
+		if ($zone_info) {
+			$this->load->model('localisation/city');
+
+			$json = array(
+				'zone_id'	=> $zone_info['zone_id'],
+				'name'		=> $zone_info['name'],
+				'city'		=> $this->model_localisation_city->getCitiesByZoneId($this->request->get['zone_id']),
+				'status'	=> $zone_info['status']
+			);
+		}
+
+		$this->response->setOutput(json_encode($json));
+	}
+			]]></add>
+		</operation>
+	</file>
+
+	<file name="admin/view/template/sale/affiliate_form.tpl">
+		<operation info="Remove city field">
+			<search position="replace" offset="8"><![CDATA[
+			  <td><input type="text" name="address_2" value="<?php echo $address_2; ?>" /></td>
+			]]></search>
+			<add><![CDATA[
+			  <td><input type="text" name="address_2" value="<?php echo $address_2; ?>" /></td>
+			</tr>
+			  </tr>
+			]]></add>
+		</operation>
+
+		<operation info="Change city text field to select and place it after zone">
+			<search position="after" offset="2"><![CDATA[
+				<span class="error"><?php echo $error_zone; ?></span>
+			]]></search>
+			<add><![CDATA[
+			<tr>
+			  <td><span class="required">*</span> <?php echo $entry_city; ?></td>
+			  <td><select name="city">
+				</select>
+				<?php if ($error_city) { ?>
+				<span class="error"><?php echo $error_city; ?></span>
+				<?php } ?></td>
+			</tr>
+			]]></add>
+		</operation>
+
+		<operation info="Call zone function after country function is triggered">
+			<search position="after"><![CDATA[
+			$('select[name=\'zone_id\']').html(html);
+			]]></search>
+			<add><![CDATA[
+			$('select[name=\'zone_id\']').trigger('change');
+			]]></add>
+		</operation>
+
+		<operation info="Add AJAX change city based on selected zone">
+			<search position="after" offset="1"><![CDATA[
+$('select[name=\'country_id\']').trigger('change');
+			]]></search>
+			<add><![CDATA[
+<script type="text/javascript"><!--
+$('select[name=\'zone_id\']').bind('change', function() {
+	$.ajax({
+		url: 'index.php?route=sale/affiliate/zone&token=<?php echo $token; ?>&zone_id=' + this.value,
+		dataType: 'json',
+		beforeSend: function() {
+			$('select[name=\'zone_id\']').after('<span class="wait">&nbsp;<img src="view/image/loading.gif" alt="" /></span>');
+		},
+		complete: function() {
+			$('.wait').remove();
+		},
+		success: function(json) {
+			html = '<option value=""><?php echo $text_select; ?></option>';
+
+			if (json != '' && json['city'] != '') {
+				for (i = 0; i < json['city'].length; i++) {
+					html += '<option value="' + json['city'][i]['name'] + '"';
+
+					if (json['city'][i]['name'] == '<?php echo $city; ?>') {
+		  				html += ' selected="selected"';
+					}
+
+					html += '>' + json['city'][i]['name'] + '</option>';
+				}
+			} else {
+				html += '<option value="0" selected="selected"><?php echo $text_none; ?></option>';
+			}
+
+			$('select[name=\'city\']').html(html);
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+$('select[name=\'zone_id\']').trigger('change');
+//--></script>
+			]]></add>
+		</operation>
+	</file>
+	<!-- add/edit affiliate via admin end -->
+
+	<!-- add/edit order via admin start -->
+	<file name="admin/controller/sale/order.php">
+		<operation info="Add AJAX Response">
+			<search position="before"><![CDATA[
+	public function info() {
+			]]></search>
+			<add><![CDATA[
+	public function zone() {
+		$json = array();
+
+		$this->load->model('localisation/zone');
+
+		$zone_info = $this->model_localisation_zone->getZone($this->request->get['zone_id']);
+
+		if ($zone_info) {
+			$this->load->model('localisation/city');
+
+			$json = array(
+				'zone_id'	=> $zone_info['zone_id'],
+				'name'		=> $zone_info['name'],
+				'city'		=> $this->model_localisation_city->getCitiesByZoneId($this->request->get['zone_id']),
+				'status'	=> $zone_info['status']
+			);
+		}
+
+		$this->response->setOutput(json_encode($json));
+	}
+			]]></add>
+		</operation>
+	</file>
+
+	<file name="admin/view/template/sale/order_form.tpl">
+		<operation info="Remove city field">
+			<search position="replace" offset="8"><![CDATA[
+			  <td><input type="text" name="payment_address_2" value="<?php echo $payment_address_2; ?>" /></td>
+			]]></search>
+			<add><![CDATA[
+			  <td><input type="text" name="payment_address_2" value="<?php echo $payment_address_2; ?>" /></td>
+			</tr>
+			]]></add>
+		</operation>
+
+		<operation info="Remove city field">
+			<search position="replace" offset="5"><![CDATA[
+			  <td><input type="text" name="shipping_address_2" value="<?php echo $shipping_address_2; ?>" /></td>
+			]]></search>
+			<add><![CDATA[
+			  <td><input type="text" name="shipping_address_2" value="<?php echo $shipping_address_2; ?>" /></td>
+			</tr>
+			</tr>
+			]]></add>
+		</operation>
+
+		<operation info="Change city text field to select and place it after zone">
+			<search position="after" offset="2"><![CDATA[
+				<span class="error"><?php echo $error_payment_zone; ?></span>
+			]]></search>
+			<add><![CDATA[
+			<tr>
+			  <td><span class="required">*</span> <?php echo $entry_city; ?></td>
+			  <td><select name="payment_city"></select>
+				<?php if ($error_payment_city) { ?>
+				<span class="error"><?php echo $error_payment_city; ?></span>
+				<?php } ?></td>
+			</tr>
+			]]></add>
+		</operation>
+
+		<operation info="Change city text field to select and place it after zone">
+			<search position="after" offset="2"><![CDATA[
+				<span class="error"><?php echo $error_shipping_zone; ?></span>
+			]]></search>
+			<add><![CDATA[
+			<tr>
+			  <td><span class="required">*</span> <?php echo $entry_city; ?></td>
+			  <td><select name="shipping_city"></select>
+				<?php if ($error_shipping_city) { ?>
+				<span class="error"><?php echo $error_shipping_city; ?></span>
+				<?php } ?></td>
+			</tr>
+			]]></add>
+		</operation>
+
+		<operation info="Call zone function after country function is triggered">
+			<search position="after"><![CDATA[
+			$('select[name=\'payment_zone_id\']').html(html);
+			]]></search>
+			<add><![CDATA[
+			$('select[name=\'payment_zone_id\']').trigger('change');
+			]]></add>
+		</operation>
+
+		<operation info="Add AJAX change city based on selected zone">
+			<search position="before"><![CDATA[
+$('select[name=\'payment_address\']').bind('change', function() {
+			]]></search>
+			<add><![CDATA[
+var payment_city = '<?php echo $payment_city; ?>';
+
+$('select[name=\'payment_zone_id\']').bind('change', function() {
+	$.ajax({
+		url: 'index.php?route=sale/order/zone&token=<?php echo $token; ?>&zone_id=' + this.value,
+		dataType: 'json',
+		beforeSend: function() {
+			$('select[name=\'payment_zone_id\']').after('<span class="wait">&nbsp;<img src="view/image/loading.gif" alt="" /></span>');
+		},
+		complete: function() {
+			$('.wait').remove();
+		},
+		success: function(json) {
+			html = '<option value=""><?php echo $text_select; ?></option>';
+
+			if (json != '' && json['city'] != '') {
+				for (i = 0; i < json['city'].length; i++) {
+					html += '<option value="' + json['city'][i]['name'] + '"';
+
+					if (json['city'][i]['name'] == payment_city) {
+		  				html += ' selected="selected"';
+					}
+
+					html += '>' + json['city'][i]['name'] + '</option>';
+				}
+			} else {
+				html += '<option value="0" selected="selected"><?php echo $text_none; ?></option>';
+			}
+
+			$('select[name=\'payment_city\']').html(html);
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+$('select[name=\'payment_zone_id\']').trigger('change');
+			]]></add>
+		</operation>
+
+		<operation info="Get correct city when change address">
+			<search position="replace"><![CDATA[
+				$('input[name=\'payment_city\']').attr('value', json['city']);
+			]]></search>
+			<add><![CDATA[
+
+			]]></add>
+		</operation>
+
+		<operation info="Get correct city when change address">
+			<search position="after" index="2"><![CDATA[
+				$('select[name=\'payment_country_id\']').trigger('change');
+			]]></search>
+			<add><![CDATA[
+				payment_city = json['city'];
+
+				$('select[name=\'payment_zone_id\']').trigger('change');
+			]]></add>
+		</operation>
+
+		<operation info="Call zone function after country function is triggered">
+			<search position="after"><![CDATA[
+			$('select[name=\'shipping_zone_id\']').html(html);
+			]]></search>
+			<add><![CDATA[
+			$('select[name=\'shipping_zone_id\']').trigger('change');
+			]]></add>
+		</operation>
+
+		<operation info="Add AJAX change city based on selected zone">
+			<search position="before"><![CDATA[
+$('select[name=\'shipping_address\']').bind('change', function() {
+			]]></search>
+			<add><![CDATA[
+var shipping_city = '<?php echo $shipping_city; ?>';
+
+$('select[name=\'shipping_zone_id\']').bind('change', function() {
+	$.ajax({
+		url: 'index.php?route=sale/order/zone&token=<?php echo $token; ?>&zone_id=' + this.value,
+		dataType: 'json',
+		beforeSend: function() {
+			$('select[name=\'shipping_zone_id\']').after('<span class="wait">&nbsp;<img src="view/image/loading.gif" alt="" /></span>');
+		},
+		complete: function() {
+			$('.wait').remove();
+		},
+		success: function(json) {
+			html = '<option value=""><?php echo $text_select; ?></option>';
+
+			if (json != '' && json['city'] != '') {
+				for (i = 0; i < json['city'].length; i++) {
+					html += '<option value="' + json['city'][i]['name'] + '"';
+
+					if (json['city'][i]['name'] == shipping_city) {
+		  				html += ' selected="selected"';
+					}
+
+					html += '>' + json['city'][i]['name'] + '</option>';
+				}
+			} else {
+				html += '<option value="0" selected="selected"><?php echo $text_none; ?></option>';
+			}
+
+			$('select[name=\'shipping_city\']').html(html);
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+$('select[name=\'shipping_zone_id\']').trigger('change');
+			]]></add>
+		</operation>
+
+		<operation info="Get correct city when change address">
+			<search position="replace"><![CDATA[
+				$('input[name=\'shipping_city\']').attr('value', json['city']);
+			]]></search>
+			<add><![CDATA[
+
+			]]></add>
+		</operation>
+
+		<operation info="Get correct city when change address">
+			<search position="after" index="2"><![CDATA[
+				$('select[name=\'shipping_country_id\']').trigger('change');
+			]]></search>
+			<add><![CDATA[
+				shipping_city = json['city'];
+
+				$('select[name=\'shipping_zone_id\']').trigger('change');
+			]]></add>
+		</operation>
+	</file>
+	<!-- add/edit order via admin start -->
+
+	<!-- Change city field in account and affiliate form start -->
+	<file name="catalog/controller/account/login.php">
+		<operation info="Unset city session">
+			<search position="after"><![CDATA[
+				unset($this->session->data['shipping_zone_id']);
+			]]></search>
+			<add><![CDATA[
+				unset($this->session->data['shipping_city']);
+			]]></add>
+		</operation>
+
+		<operation info="Unset city session">
+			<search position="after"><![CDATA[
+				unset($this->session->data['payment_zone_id']);
+			]]></search>
+			<add><![CDATA[
+				unset($this->session->data['payment_city']);
+			]]></add>
+		</operation>
+
+		<operation info="Set city session">
+			<search position="after"><![CDATA[
+				$this->session->data['shipping_zone_id'] = $address_info['zone_id'];
+			]]></search>
+			<add><![CDATA[
+				$this->session->data['shipping_city'] = $address_info['city'];
+			]]></add>
+		</operation>
+
+		<operation info="Set city session">
+			<search position="after"><![CDATA[
+				$this->session->data['payment_zone_id'] = $address_info['zone_id'];
+			]]></search>
+			<add><![CDATA[
+				$this->session->data['payment_city'] = $address_info['city'];
+			]]></add>
+		</operation>
+	</file>
+
+	<file path="catalog/controller/" name="account/address.php,account/register.php,affiliate/edit.php,affiliate/register.php">
+		<operation info="Get cities data">
+			<search position="before"><![CDATA[
+		if (isset($this->request->post['city'])) {
+			]]></search>
+			<add><![CDATA[
+		$this->load->model('localisation/city');
+
+		$this->data['cities'] = $this->model_localisation_city->getCities();
+			]]></add>
+		</operation>
+
+		<operation info="Add AJAX response">
+			<search position="before" offset="1"><![CDATA[
+?>
+			]]></search>
+			<add><![CDATA[
+	public function zone() {
+		$json = array();
+
+		$this->load->model('localisation/zone');
+
+		$zone_info = $this->model_localisation_zone->getZone($this->request->get['zone_id']);
+
+		if ($zone_info) {
+			$this->load->model('localisation/city');
+
+			$json = array(
+				'zone_id'	=> $zone_info['zone_id'],
+				'name'		=> $zone_info['name'],
+				'city'		=> $this->model_localisation_city->getCitiesByZoneId($this->request->get['zone_id']),
+				'status'	=> $zone_info['status']
+			);
+		}
+
+		$this->response->setOutput(json_encode($json));
+	}
+			]]></add>
+		</operation>
+	</file>
+
+	<file path="catalog/view/theme/default/template/" name="account/address_form.tpl,account/register.tpl,affiliate/edit.tpl,affiliate/register.tpl">
+		<operation info="Remove city field">
+			<search position="replace" offset="8"><![CDATA[
+		  <td><input type="text" name="address_2" value="<?php echo $address_2; ?>" /></td>
+			]]></search>
+			<add><![CDATA[
+		  <td><input type="text" name="address_2" value="<?php echo $address_2; ?>" /></td>
+		</tr>
+			]]></add>
+		</operation>
+
+		<operation info="Change city text field to select and place it after zone">
+			<search position="after" offset="2"><![CDATA[
+			<span class="error"><?php echo $error_zone; ?></span>
+			]]></search>
+			<add><![CDATA[
+		<tr>
+		  <td><span class="required">*</span> <?php echo $entry_city; ?></td>
+		  <td><select name="city"><option value=""><?php echo $text_select; ?></option></select>
+			<?php if ($error_city) { ?>
+			<span class="error"><?php echo $error_city; ?></span>
+			<?php } ?>
+		  </td>
+		</tr>
+			]]></add>
+		</operation>
+
+		<operation info="Call zone function after country function is triggered">
+			<search position="after"><![CDATA[
+				$('select[name=\'zone_id\']').html(html);
+			]]></search>
+			<add><![CDATA[
+				$('select[name=\'zone_id\']').trigger('change');
+			]]></add>
+		</operation>
+
+		<operation info="Add AJAX change city based on selected zone">
+			<search position="before"><![CDATA[
+<?php echo $footer; ?>
+			]]></search>
+			<add><![CDATA[
+<script type="text/javascript"><!--
+$('select[name=\'zone_id\']').bind('change', function() {
+	if (this.value == '') return;
+	$.ajax({
+		url: 'index.php?route=account/register/zone&zone_id=' + this.value,
+		dataType: 'json',
+		beforeSend: function() {
+			$('select[name=\'zone_id\']').after('<span class="wait">&nbsp;<img src="catalog/view/theme/default/image/loading.gif" alt="" /></span>');
+		},
+		complete: function() {
+			$('.wait').remove();
+		},
+		success: function(json) {
+			html = '<option value=""><?php echo $text_select; ?></option>';
+
+			if (json['city'] != '') {
+				for (i = 0; i < json['city'].length; i++) {
+					html += '<option value="' + json['city'][i]['name'] + '"';
+
+					if (json['city'][i]['name'] == '<?php echo $city; ?>') {
+		  				html += ' selected="selected"';
+					}
+
+					html += '>' + json['city'][i]['name'] + '</option>';
+				}
+			} else {
+				html += '<option value="0" selected="selected"><?php echo $text_none; ?></option>';
+			}
+
+			$('select[name=\'city\']').html(html);
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+$('select[name=\'zone_id\']').trigger('change');
+//--></script>
+			]]></add>
+		</operation>
+	</file>
+	<!-- Change city field in account form end -->
+
+	<!-- Change city field in checkout form start -->
+	<file name="catalog/controller/checkout/guest.php">
+		<operation info="Get payment cities data">
+			<search position="before"><![CDATA[
+		if (isset($this->session->data['guest']['payment']['city'])) {
+			]]></search>
+			<add><![CDATA[
+		$this->load->model('localisation/city');
+
+		$this->data['cities'] = $this->model_localisation_city->getCities();
+			]]></add>
+		</operation>
+	</file>
+
+	<file name="catalog/controller/checkout/guest_shipping.php">
+		<operation info="Get shipping cities data">
+			<search position="before"><![CDATA[
+		if (isset($this->session->data['guest']['shipping']['city'])) {
+			]]></search>
+			<add><![CDATA[
+		$this->load->model('localisation/city');
+
+		$this->data['cities'] = $this->model_localisation_city->getCities();
+			]]></add>
+		</operation>
+	</file>
+
+	<file path="catalog/controller/checkout/" name="payment_address.php,register.php,shipping_address.php">
+		<operation info="Get payment cities data">
+			<search position="before" index="1"><![CDATA[
+		$this->load->model('localisation/country');
+			]]></search>
+			<add><![CDATA[
+		$this->load->model('localisation/city');
+
+		$this->data['cities'] = $this->model_localisation_city->getCities();
+			]]></add>
+		</operation>
+	</file>
+
+	<file name="catalog/controller/checkout/payment_address.php">
+		<operation info="Put existed customer city in session">
+			<search position="after"><![CDATA[
+						$this->session->data['payment_zone_id'] = $address_info['zone_id'];
+			]]></search>
+			<add><![CDATA[
+						$this->session->data['payment_city'] = $address_info['city'];
+			]]></add>
+		</operation>
+
+		<operation info="Unset city session if customer city not exist">
+			<search position="after"><![CDATA[
+						unset($this->session->data['payment_zone_id']);
+			]]></search>
+			<add><![CDATA[
+						unset($this->session->data['payment_city']);
+			]]></add>
+		</operation>
+
+		<operation info="Put posted request customer city in session">
+			<search position="after"><![CDATA[
+					$this->session->data['payment_zone_id'] = $this->request->post['zone_id'];
+			]]></search>
+			<add><![CDATA[
+					$this->session->data['payment_city'] = $this->request->post['city'];
+			]]></add>
+		</operation>
+
+		<operation info="Check city session">
+			<search position="after"><![CDATA[
+						$this->session->data['payment_zone_id'] = $address_info['zone_id'];
+			]]></search>
+			<add><![CDATA[
+						$this->session->data['payment_city'] = $address_info['city'];
+			]]></add>
+		</operation>
+
+		<operation info="Check city session">
+			<search position="after"><![CDATA[
+		$this->data['cities'] = $this->model_localisation_city->getCities();
+			]]></search>
+			<add><![CDATA[
+		if (isset($this->session->data['payment_city'])) {
+			$this->data['city'] = $this->session->data['payment_city'];
+		} else {
+			$this->data['city'] = '';
+		}
+			]]></add>
+		</operation>
+	</file>
+
+	<file name="catalog/controller/checkout/shipping_address.php">
+		<operation info="Add city session">
+			<search position="after"><![CDATA[
+		$this->data['cities'] = $this->model_localisation_city->getCities();
+			]]></search>
+			<add><![CDATA[
+		if (isset($this->session->data['shipping_city'])) {
+			$this->data['city'] = $this->session->data['shipping_city'];
+		} else {
+			$this->data['city'] = '';
+		}
+			]]></add>
+		</operation>
+	</file>
+
+	<file name="catalog/controller/checkout/checkout.php">
+		<operation info="Add AJAX response">
+			<search position="before" offset="1"><![CDATA[
+?>
+			]]></search>
+			<add><![CDATA[
+	public function zone() {
+		$json = array();
+
+		$this->load->model('localisation/zone');
+
+		$zone_info = $this->model_localisation_zone->getZone($this->request->get['zone_id']);
+
+		if ($zone_info) {
+			$this->load->model('localisation/city');
+
+			$json = array(
+				'zone_id'	=> $zone_info['zone_id'],
+				'name'		=> $zone_info['name'],
+				'city'		=> $this->model_localisation_city->getCitiesByZoneId($this->request->get['zone_id']),
+				'status'	=> $zone_info['status']
+			);
+		}
+
+		$this->response->setOutput(json_encode($json));
+	}
+			]]></add>
+		</operation>
+	</file>
+
+	<file name="catalog/view/theme/default/template/checkout/guest.tpl">
+		<operation info="Remove city field">
+			<search position="replace" offset="4"><![CDATA[
+  <input type="text" name="address_2" value="<?php echo $address_2; ?>" class="large-field" />
+			]]></search>
+			<add><![CDATA[
+  <input type="text" name="address_2" value="<?php echo $address_2; ?>" class="large-field" />
+			]]></add>
+		</operation>
+
+		<operation info="Change city text field to select and place it after zone">
+			<search position="after" offset="1"><![CDATA[
+  <select name="zone_id" class="large-field">
+			]]></search>
+			<add><![CDATA[
+  <br />
+  <br />
+  <select name="city" class="large-field"><option value=""><?php echo $text_select; ?></option></select>
+			]]></add>
+		</operation>
+	</file>
+
+	<file path="catalog/view/theme/default/template/checkout/" name="guest.tpl,payment_address.tpl,register.tpl">
+		<operation info="Call zone function after country function is triggered">
+			<search position="after"><![CDATA[
+				$('#payment-address select[name=\'zone_id\']').html(html);
+			]]></search>
+			<add><![CDATA[
+				$('#payment-address select[name=\'zone_id\']').trigger('change');
+			]]></add>
+		</operation>
+
+		<operation info="Add AJAX change city based on selected zone">
+			<search position="after" offset="1"><![CDATA[
+$('#payment-address select[name=\'country_id\']').trigger('change');
+			]]></search>
+			<add><![CDATA[
+<script type="text/javascript"><!--
+$('#payment-address select[name=\'zone_id\']').bind('change', function() {
+	if (this.value == '') return;
+	$.ajax({
+		url: 'index.php?route=checkout/checkout/zone&zone_id=' + this.value,
+		dataType: 'json',
+		beforeSend: function() {
+			$('#payment-address select[name=\'zone_id\']').after('<span class="wait">&nbsp;<img src="catalog/view/theme/default/image/loading.gif" alt="" /></span>');
+		},
+		complete: function() {
+			$('.wait').remove();
+		},
+		success: function(json) {
+			html = '<option value=""><?php echo $text_select; ?></option>';
+
+			if (json['city'] != '') {
+				for (i = 0; i < json['city'].length; i++) {
+					html += '<option value="' + json['city'][i]['name'] + '"';
+
+					if (json['city'][i]['name'] == '<?php echo $city; ?>') {
+		  				html += ' selected="selected"';
+					}
+
+					html += '>' + json['city'][i]['name'] + '</option>';
+				}
+			} else {
+				html += '<option value="0" selected="selected"><?php echo $text_none; ?></option>';
+			}
+
+			$('#payment-address select[name=\'city\']').html(html);
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+$('#payment-address select[name=\'zone_id\']').trigger('change');
+//--></script>
+			]]></add>
+		</operation>
+	</file>
+
+	<file name="catalog/view/theme/default/template/checkout/guest_shipping.tpl">
+		<operation info="Remove city field">
+			<search position="replace" offset="5"><![CDATA[
+	<td><input type="text" name="address_2" value="<?php echo $address_2; ?>" class="large-field" /></td>
+			]]></search>
+			<add><![CDATA[
+	<td><input type="text" name="address_2" value="<?php echo $address_2; ?>" class="large-field" /></td>
+  </tr>
+			]]></add>
+		</operation>
+
+		<operation info="Change city text field to select and place it after zone">
+			<search position="after" offset="2"><![CDATA[
+	<td><select name="zone_id" class="large-field">
+			]]></search>
+			<add><![CDATA[
+  <tr>
+	<td><span class="required">*</span> <?php echo $entry_city; ?></td>
+	<td><select name="city" class="large-field"><option value=""><?php echo $text_select; ?></option></select></td>
+  </tr>
+			]]></add>
+		</operation>
+	</file>
+
+	<file path="catalog/view/theme/default/template/checkout/" name="guest_shipping.tpl,shipping_address.tpl">
+		<operation info="Call zone function after country function is triggered">
+			<search position="after"><![CDATA[
+				$('#shipping-address select[name=\'zone_id\']').html(html);
+			]]></search>
+			<add><![CDATA[
+				$('#shipping-address select[name=\'zone_id\']').trigger('change');
+			]]></add>
+		</operation>
+
+		<operation info="Add AJAX change city based on selected zone">
+			<search position="after" offset="1"><![CDATA[
+$('#shipping-address select[name=\'country_id\']').trigger('change');
+			]]></search>
+			<add><![CDATA[
+<script type="text/javascript"><!--
+$('#shipping-address select[name=\'zone_id\']').bind('change', function() {
+	if (this.value == '') return;
+	$.ajax({
+		url: 'index.php?route=checkout/checkout/zone&zone_id=' + this.value,
+		dataType: 'json',
+		beforeSend: function() {
+			$('#shipping-address select[name=\'zone_id\']').after('<span class="wait">&nbsp;<img src="catalog/view/theme/default/image/loading.gif" alt="" /></span>');
+		},
+		complete: function() {
+			$('.wait').remove();
+		},
+		success: function(json) {
+			html = '<option value=""><?php echo $text_select; ?></option>';
+
+			if (json['city'] != '') {
+				for (i = 0; i < json['city'].length; i++) {
+					html += '<option value="' + json['city'][i]['name'] + '"';
+
+					if (json['city'][i]['name'] == '<?php echo $city; ?>') {
+		  				html += ' selected="selected"';
+					}
+
+					html += '>' + json['city'][i]['name'] + '</option>';
+				}
+			} else {
+				html += '<option value="0" selected="selected"><?php echo $text_none; ?></option>';
+			}
+
+			$('#shipping-address select[name=\'city\']').html(html);
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+$('#shipping-address select[name=\'zone_id\']').trigger('change');
+//--></script>
+			]]></add>
+		</operation>
+	</file>
+
+	<file path="catalog/view/theme/default/template/checkout/" name="payment_address.tpl,shipping_address.tpl">
+		<operation info="Remove city field">
+			<search position="replace" offset="5"><![CDATA[
+	  <td><input type="text" name="address_2" value="" class="large-field" /></td>
+			]]></search>
+			<add><![CDATA[
+	  <td><input type="text" name="address_2" value="" class="large-field" /></td>
+	</tr>
+			]]></add>
+		</operation>
+
+		<operation info="Change city text field to select and place it after zone">
+			<search position="after" offset="2"><![CDATA[
+	  <td><select name="zone_id" class="large-field">
+			]]></search>
+			<add><![CDATA[
+	<tr>
+	  <td><span class="required">*</span> <?php echo $entry_city; ?></td>
+	  <td><select name="city" class="large-field"><option value=""><?php echo $text_select; ?></option></select></td>
+	</tr>
+			]]></add>
+		</operation>
+	</file>
+
+	<file name="catalog/view/theme/default/template/checkout/register.tpl">
+		<operation info="Remove city field">
+			<search position="replace" offset="4"><![CDATA[
+<input type="text" name="address_2" value="" class="large-field" />
+			]]></search>
+			<add><![CDATA[
+<input type="text" name="address_2" value="" class="large-field" />
+			]]></add>
+		</operation>
+
+		<operation info="Change city text field to select and place it after zone">
+			<search position="after" offset="1"><![CDATA[
+<select name="zone_id" class="large-field">
+			]]></search>
+			<add><![CDATA[
+<br />
+<br />
+<span class="required">*</span> <?php echo $entry_city; ?><br />
+<select name="city" class="large-field"><option value=""><?php echo $text_select; ?></option></select>
+			]]></add>
+		</operation>
+	</file>
+
+	<file name="catalog/view/theme/default/template/checkout/checkout.tpl">
+		<operation info="Change city error message">
+			<search position="replace"><![CDATA[
+					$('#payment-address input[name=\'city\']').after('<span class="error">' + json['error']['city'] + '</span>');
+			]]></search>
+			<add><![CDATA[
+					$('#payment-address select[name=\'city\']').after('<span class="error">' + json['error']['city'] + '</span>');
+			]]></add>
+		</operation>
+
+		<operation info="Change city error message">
+			<search position="replace"><![CDATA[
+					$('#shipping-address input[name=\'city\']').after('<span class="error">' + json['error']['city'] + '</span>');
+			]]></search>
+			<add><![CDATA[
+					$('#shipping-address select[name=\'city\']').after('<span class="error">' + json['error']['city'] + '</span>');
+			]]></add>
+		</operation>
+
+		<operation info="Change city error message">
+			<search position="replace"><![CDATA[
+					$('#payment-address input[name=\'city\'] + br').after('<span class="error">' + json['error']['city'] + '</span>');
+			]]></search>
+			<add><![CDATA[
+					$('#payment-address select[name=\'city\'] + br').after('<span class="error">' + json['error']['city'] + '</span>');
+			]]></add>
+		</operation>
+	</file>
+	<!-- Change city field in checkout form start -->
+
+	<!-- Change city error messages start -->
+	<file path="catalog/language/indonesia/" name="account/address.php,account/register.php,affiliate/edit.php,affiliate/register.php,checkout/checkout.php">
+		<operation info="Change city error message">
+			<search position="replace"><![CDATA[
+Kota harus terdiri dari 2 s/d 128 karakter!
+			]]></search>
+			<add><![CDATA[
+Silakan pilih kota!
+			]]></add>
+		</operation>
+	</file>
+
+	<file path="catalog/language/english/" name="account/address.php,account/register.php,affiliate/edit.php,affiliate/register.php,checkout/checkout.php">
+		<operation info="Change city error message">
+			<search position="replace"><![CDATA[
+City must be between 2 and 128 characters!
+			]]></search>
+			<add><![CDATA[
+Please select a city!
+			]]></add>
+		</operation>
+	</file>
+	<!-- Change city error messages start -->
+</modification>
