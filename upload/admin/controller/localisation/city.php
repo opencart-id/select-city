@@ -390,24 +390,6 @@ class ControllerLocalisationCity extends Controller {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
-		$this->load->model('setting/store');
-		$this->load->model('sale/customer');
-		$this->load->model('sale/affiliate');
-
-		foreach ($this->request->post['selected'] as $city_id) {
-			$address_total = $this->model_sale_customer->getTotalAddressesByCityId($city_id);
-
-			if ($address_total) {
-				$this->error['warning'] = sprintf($this->language->get('error_address'), $address_total);
-			}
-
-			$affiliate_total = $this->model_sale_affiliate->getTotalAffiliatesByCityId($city_id);
-
-			if ($affiliate_total) {
-				$this->error['warning'] = sprintf($this->language->get('error_affiliate'), $affiliate_total);
-			}
-		}
-
 		if (!$this->error) {
 			return true;
 		} else {
