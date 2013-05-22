@@ -1099,17 +1099,6 @@ $('#shipping-address select[name=\'zone_id\']').trigger('change');
 	<!-- Change city field in checkout form start -->
 
 	<!-- Change city error messages start -->
-	<file path="catalog/language/indonesia/" name="account/address.php,account/register.php,affiliate/edit.php,affiliate/register.php,checkout/checkout.php">
-		<operation info="Change city error message">
-			<search position="replace"><![CDATA[
-Kota harus terdiri dari 2 s/d 128 karakter!
-			]]></search>
-			<add><![CDATA[
-Silakan pilih kota!
-			]]></add>
-		</operation>
-	</file>
-
 	<file path="catalog/language/english/" name="account/address.php,account/register.php,affiliate/edit.php,affiliate/register.php,checkout/checkout.php">
 		<operation info="Change city error message">
 			<search position="replace"><![CDATA[
@@ -1117,6 +1106,17 @@ City must be between 2 and 128 characters!
 			]]></search>
 			<add><![CDATA[
 Please select a city!
+			]]></add>
+		</operation>
+	</file>
+
+	<file path="catalog/language/indonesia/" name="account/address.php,account/register.php,affiliate/edit.php,affiliate/register.php,checkout/checkout.php" error="skip">
+		<operation info="Change city error message" error="skip">
+			<search position="replace"><![CDATA[
+Kota harus terdiri dari 2 s/d 128 karakter!
+			]]></search>
+			<add><![CDATA[
+Silakan pilih kota!
 			]]></add>
 		</operation>
 	</file>
