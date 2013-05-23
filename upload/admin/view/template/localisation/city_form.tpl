@@ -24,6 +24,18 @@
               <?php } ?></td>
           </tr>
           <tr>
+            <td><?php echo $entry_country; ?></td>
+            <td><select name="country_id" onchange="country(this, '<?php echo $zone_id; ?>');">
+                <?php foreach ($countries as $country) { ?>
+                <?php if ($country['country_id'] == $country_id) { ?>
+                <option value="<?php echo $country['country_id']; ?>" selected="selected"><?php echo $country['name']; ?></option>
+                <?php } else { ?>
+                <option value="<?php echo $country['country_id']; ?>"><?php echo $country['name']; ?></option>
+                <?php } ?>
+                <?php } ?>
+              </select></td>
+          </tr>
+          <tr>
             <td><?php echo $entry_zone; ?></td>
             <td><select name="zone_id">
                 <?php foreach ($zones as $zone) { ?>
@@ -52,4 +64,44 @@
     </div>
   </div>
 </div>
+<script type="text/javascript"><!--
+function country(element, zone_id) {
+  if (element.value != '') {
+		$.ajax({
+			url: 'index.php?route=localisation/city/country&token=<?php echo $token; ?>&country_id=' + element.value,
+			dataType: 'json',
+			beforeSend: function() {
+				$('select[name=\'country_id\']').after('<span class="wait">&nbsp;<img src="view/image/loading.gif" alt="" /></span>');
+			},
+			complete: function() {
+				$('.wait').remove();
+			},			
+			success: function(json) {
+				html = '<option value=""><?php echo $text_select; ?></option>';
+				
+				if (json['zone'] != '') {
+					for (i = 0; i < json['zone'].length; i++) {
+						html += '<option value="' + json['zone'][i]['zone_id'] + '"';
+						
+						if (json['zone'][i]['zone_id'] == zone_id) {
+							html += ' selected="selected"';
+						}
+		
+						html += '>' + json['zone'][i]['name'] + '</option>';
+					}
+				} else {
+					html += '<option value="0"><?php echo $text_none; ?></option>';
+				}
+				
+				$('select[name=\'zone_id\']').html(html);
+			},
+			error: function(xhr, ajaxOptions, thrownError) {
+				alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+			}
+		});
+	}
+}
+
+$('select[name$=\'country_id\']').trigger('change');
+//--></script>
 <?php echo $footer; ?>

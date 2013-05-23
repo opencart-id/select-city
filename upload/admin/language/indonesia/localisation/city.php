@@ -13,6 +13,7 @@ $_['column_action']		= 'Aksi';
 
 // Entry
 $_['entry_name']		= 'Nama Kota:';
+$_['entry_country']		= 'Negara:';
 $_['entry_zone']		= 'Wilayah:';
 $_['entry_status']		= 'Status:';
 

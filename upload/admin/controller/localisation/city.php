@@ -271,8 +271,11 @@ class ControllerLocalisationCity extends Controller {
 
 		$this->data['text_enabled'] = $this->language->get('text_enabled');
 		$this->data['text_disabled'] = $this->language->get('text_disabled');
+		$this->data['text_select'] = $this->language->get('text_select');
+		$this->data['text_none'] = $this->language->get('text_none');
 
 		$this->data['entry_name'] = $this->language->get('entry_name');
+		$this->data['entry_country'] = $this->language->get('entry_country');
 		$this->data['entry_zone'] = $this->language->get('entry_zone');
 		$this->data['entry_status'] = $this->language->get('entry_status');
 
@@ -351,6 +354,20 @@ class ControllerLocalisationCity extends Controller {
 			$this->data['zone_id'] = 0;
 		}
 
+		$this->load->model('localisation/country');
+
+		$this->data['countries'] = $this->model_localisation_country->getCountries();
+
+		if (isset($this->request->post['country_id'])) {
+			$this->data['country_id'] = $this->request->post['country_id'];
+		} elseif (!empty($city_info)) {
+			$zone = $this->model_localisation_zone->getZone($city_info['zone_id']);
+
+			$this->data['country_id'] = $zone['country_id'];
+		} else {
+			$this->data['country_id'] = 0;
+		}
+
 		if (isset($this->request->post['status'])) {
 			$this->data['status'] = $this->request->post['status'];
 		} elseif (isset($city_info)) {
@@ -358,6 +375,8 @@ class ControllerLocalisationCity extends Controller {
 		} else {
 			$this->data['status'] = '1';
 		}
+
+		$this->data['token'] = $this->session->data['token'];
 
 		$this->template = 'localisation/city_form.tpl';
 
@@ -395,6 +414,31 @@ class ControllerLocalisationCity extends Controller {
 		} else {
 			return false;
 		}
+	}
+
+	public function country() {
+		$json = array();
+
+		$this->load->model('localisation/country');
+
+		$country_info = $this->model_localisation_country->getCountry($this->request->get['country_id']);
+
+		if ($country_info) {
+			$this->load->model('localisation/zone');
+
+			$json = array(
+				'country_id'        => $country_info['country_id'],
+				'name'              => $country_info['name'],
+				'iso_code_2'        => $country_info['iso_code_2'],
+				'iso_code_3'        => $country_info['iso_code_3'],
+				'address_format'    => $country_info['address_format'],
+				'postcode_required' => $country_info['postcode_required'],
+				'zone'              => $this->model_localisation_zone->getZonesByCountryId($this->request->get['country_id']),
+				'status'            => $country_info['status']		
+			);
+		}
+
+		$this->response->setOutput(json_encode($json));
 	}
 }
 ?>
