@@ -98,51 +98,6 @@ class ModelLocalisationCity extends Model {
 	}
 
 	public function checkDatabase() {
-		// Kepulauan Riau zone
-		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "zone` WHERE name = 'Kepulauan Riau'");
-
-		if (!$query->num_rows) {
-			$this->db->query("INSERT INTO " . DB_PREFIX . "zone SET status = '1', name = 'Kepulauan Riau', code = 'KR', country_id = '100'");
-
-			$kep_riau_id = $this->db->getLastId();
-		} else {
-			$kep_riau_id = $query->row['zone_id'];
-		}
-
-		
-		// Papua Barat zone
-		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "zone` WHERE name = 'Papua Barat'");
-
-		if (!$query->num_rows) {
-			$this->db->query("INSERT INTO `" . DB_PREFIX . "zone` SET status = '1', name = 'Papua Barat', code = 'PB', country_id = '100'");
-
-			$papua_barat_id = $this->db->getLastId();
-		} else {
-			$papua_barat_id = $query->row['zone_id'];
-		}
-
-		// Kalimantan Utara zone
-		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "zone` WHERE name = 'Kalimantan Utara'");
-
-		if (!$query->num_rows) {
-			$this->db->query("INSERT INTO `" . DB_PREFIX . "zone` SET status = '1', name = 'Kalimantan Utara', code = 'PB', country_id = '100'");
-
-			$kal_utara_id = $this->db->getLastId();
-		} else {
-			$kal_utara_id = $query->row['zone_id'];
-		}
-
-		// Sulawesi Barat zone
-		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "zone` WHERE name = 'Sulawesi Barat'");
-
-		if (!$query->num_rows) {
-			$this->db->query("INSERT INTO `" . DB_PREFIX . "zone` SET status = '1', name = 'Sulawesi Barat', code = 'SR', country_id = '100'");
-
-			$sul_barat_id = $this->db->getLastId();
-		} else {
-			$sul_barat_id = $query->row['zone_id'];
-		}
-
 		// Cities
 		$query = $this->db->query("SHOW TABLES LIKE '" . DB_PREFIX . "city'");
 
@@ -236,6 +191,7 @@ class ModelLocalisationCity extends Model {
 				(1515, 'Kab. Karawang', 1),
 				(1515, 'Kab. Kuningan', 1),
 				(1515, 'Kab. Majalengka', 1),
+				(1515, 'Kab. Pangandaran', 1),
 				(1515, 'Kab. Purwakarta', 1),
 				(1515, 'Kab. Subang', 1),
 				(1515, 'Kab. Sukabumi', 1),
@@ -365,19 +321,15 @@ class ModelLocalisationCity extends Model {
 				(1520, 'Kab. Seruyan', 1),
 				(1520, 'Palangkaraya', 1),
 				(1521, 'Kab. Berau', 1),
-				(1521, 'Kab. Bulungan', 1),
 				(1521, 'Kab. Kutai Barat', 1),
 				(1521, 'Kab. Kutai Kertanegara', 1),
 				(1521, 'Kab. Kutai Timur', 1),
-				(1521, 'Kab. Malinau', 1),
-				(1521, 'Kab. Nunukan', 1),
+				(1521, 'Kab. Mahakam Ulu', 1),
 				(1521, 'Kab. Pasir', 1),
 				(1521, 'Kab. Penajam Paser Utara', 1),
-				(1521, 'Kab. Tanah Tidung', 1),
 				(1521, 'Balikpapan', 1),
 				(1521, 'Bontang', 1),
 				(1521, 'Samarinda', 1),
-				(1521, 'Tarakan', 1),
 				(1522, 'Kab. Bangka', 1),
 				(1522, 'Kab. Bangka Barat', 1),
 				(1522, 'Kab. Bangka Tengah', 1),
@@ -394,6 +346,7 @@ class ModelLocalisationCity extends Model {
 				(1523, 'Kab. Tanggamus', 1),
 				(1523, 'Kab. Tulang Bawang', 1),
 				(1523, 'Kab. Pesawaran', 1),
+				(1523, 'Kab. Pesisir Barat', 1),
 				(1523, 'Kab. Pringsewu', 1),
 				(1523, 'Kab. Mesuji', 1),
 				(1523, 'Kab. Tulang Bawang Barat', 1),
@@ -417,6 +370,7 @@ class ModelLocalisationCity extends Model {
 				(1525, 'Kab. Halmahera Utara', 1),
 				(1525, 'Kab. Kepulauan Sula', 1),
 				(1525, 'Kab. Morotai', 1),
+				(1525, 'Kab. Pulau Taliabu', 1),
 				(1525, 'Ternate', 1),
 				(1525, 'Tidore Kepulauan', 1),
 				(1526, 'Kab. Bima', 1),
@@ -435,6 +389,7 @@ class ModelLocalisationCity extends Model {
 				(1527, 'Kab. Flores Timur', 1),
 				(1527, 'Kab. Kupang', 1),
 				(1527, 'Kab. Lembata', 1),
+				(1527, 'Kab. Malaka', 1),
 				(1527, 'Kab. Manggarai', 1),
 				(1527, 'Kab. Manggarai Barat', 1),
 				(1527, 'Kab. Manggarai Timur', 1),
@@ -503,6 +458,7 @@ class ModelLocalisationCity extends Model {
 				(1530, 'Kab. Luwu Utara', 1),
 				(1530, 'Kab. Maros', 1),
 				(1530, 'Kab. Pangkajene Kepulauan (Pangkep)', 1),
+				(1530, 'Kab. Penukai Abab Lematang Ilir', 1),
 				(1530, 'Kab. Pinrang', 1),
 				(1530, 'Kab. Selayar', 1),
 				(1530, 'Kab. Sinjai', 1),
@@ -517,6 +473,7 @@ class ModelLocalisationCity extends Model {
 				(1530, 'Pare-Pare', 1),
 				(1531, 'Kab. Banggai', 1),
 				(1531, 'Kab. Banggai Kepulauan', 1),
+				(1531, 'Kab. Banggai Laut', 1),
 				(1531, 'Kab. Buol', 1),
 				(1531, 'Kab. Donggala', 1),
 				(1531, 'Kab. Morowali', 1),
@@ -531,6 +488,7 @@ class ModelLocalisationCity extends Model {
 				(1532, 'Kab. Buton Utara', 1),
 				(1532, 'Kab. Kolaka', 1),
 				(1532, 'Kab. Kolaka Utara', 1),
+				(1532, 'Kab. Kolaka Timur', 1),
 				(1532, 'Kab. Kendari (Kab. Konawe)', 1),
 				(1532, 'Kab. Konawe Utara', 1),
 				(1532, 'Kab. Konawe Selatan', 1),
@@ -624,25 +582,108 @@ class ModelLocalisationCity extends Model {
 				(1537, 'Kab. Gunung Kidul', 1),
 				(1537, 'Kab. Kulon Progo', 1),
 				(1537, 'Kab. Sleman', 1),
-				(1537, 'Yogyakarta', 1),
+				(1537, 'Yogyakarta', 1);"
+			);
+		}
+
+		// Kepulauan Riau zone
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "zone` WHERE name = 'Kepulauan Riau'");
+
+		if ($query->num_rows) {
+			$kep_riau_id = $query->row['zone_id'];
+		} else {
+			$this->db->query("INSERT INTO " . DB_PREFIX . "zone SET status = '1', name = 'Kepulauan Riau', code = 'KR', country_id = '100'");
+
+			$kep_riau_id = $this->db->getLastId();
+		}
+
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "city` WHERE zone_id = '" . (int)$kep_riau_id . "'");
+
+		if (!$query->num_rows) {
+			$this->db->query(
+				"INSERT INTO `" . DB_PREFIX . "city` (`zone_id`, `name`, `status`) VALUES
 				(" . $kep_riau_id . ", 'Kab. Karimun', 1),
 				(" . $kep_riau_id . ", 'Kab. Bintan (Kep. Riau)', 1),
 				(" . $kep_riau_id . ", 'Kab. Lingga', 1),
 				(" . $kep_riau_id . ", 'Kab. Natuna', 1),
 				(" . $kep_riau_id . ", 'Kab. Kepulauan Anambas', 1),
 				(" . $kep_riau_id . ", 'Tanjungpinang', 1),
-				(" . $kep_riau_id . ", 'Batam', 1),
+				(" . $kep_riau_id . ", 'Batam', 1);"
+			);
+		}
+
+		// Papua Barat zone
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "zone` WHERE name = 'Papua Barat'");
+
+		if ($query->num_rows) {
+			$papua_barat_id = $query->row['zone_id'];
+		} else {
+			$this->db->query("INSERT INTO `" . DB_PREFIX . "zone` SET status = '1', name = 'Papua Barat', code = 'PB', country_id = '100'");
+
+			$papua_barat_id = $this->db->getLastId();
+		}
+
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "city` WHERE zone_id = '" . (int)$papua_barat_id . "'");
+
+		if (!$query->num_rows) {
+			$this->db->query(
+				"INSERT INTO `" . DB_PREFIX . "city` (`zone_id`, `name`, `status`) VALUES
 				(" . $papua_barat_id . ", 'Kab. Fak-Fak', 1),
 				(" . $papua_barat_id . ", 'Kab. Kaimana', 1),
 				(" . $papua_barat_id . ", 'Kab. Kepulauan Raja Ampat', 1),
 				(" . $papua_barat_id . ", 'Kab. Manokwari', 1),
+				(" . $papua_barat_id . ", 'Kab. Manokwari Selatan', 1),
+				(" . $papua_barat_id . ", 'Kab. Pegunungan Arfak', 1),
 				(" . $papua_barat_id . ", 'Kab. Sorong Selatan', 1),
 				(" . $papua_barat_id . ", 'Kab. Teluk Bintuni', 1),
 				(" . $papua_barat_id . ", 'Kab. Sorong', 1),
 				(" . $papua_barat_id . ", 'Kab. Teluk Wondama', 1),
 				(" . $papua_barat_id . ", 'Kab. Tambrauw', 0),
 				(" . $papua_barat_id . ", 'Kab. Maibrat', 0),
-				(" . $papua_barat_id . ", 'Sorong', 1),
+				(" . $papua_barat_id . ", 'Sorong', 1);"
+			);
+		}
+
+		// Kalimantan Utara zone
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "zone` WHERE name = 'Kalimantan Utara'");
+
+		if ($query->num_rows) {
+			$kal_utara_id = $query->row['zone_id'];
+		} else {
+			$this->db->query("INSERT INTO `" . DB_PREFIX . "zone` SET status = '1', name = 'Kalimantan Utara', code = 'PB', country_id = '100'");
+
+			$kal_utara_id = $this->db->getLastId();
+		}
+
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "city` WHERE zone_id = '" . (int)$kal_utara_id . "'");
+
+		if (!$query->num_rows) {
+			$this->db->query(
+				"INSERT INTO `" . DB_PREFIX . "city` (`zone_id`, `name`, `status`) VALUES
+				(" . $kal_utara_id . ", 'Kab. Bulungan', 1),
+				(" . $kal_utara_id . ", 'Kab. Malinau', 1),
+				(" . $kal_utara_id . ", 'Kab. Nunukan', 1),
+				(" . $kal_utara_id . ", 'Kab. Tanah Tidung', 1),
+				(" . $kal_utara_id . ", 'Tarakan', 1);"
+			);
+		}
+
+		// Sulawesi Barat zone
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "zone` WHERE name = 'Sulawesi Barat'");
+
+		if ($query->num_rows) {
+			$sul_barat_id = $query->row['zone_id'];
+		} else {
+			$this->db->query("INSERT INTO `" . DB_PREFIX . "zone` SET status = '1', name = 'Sulawesi Barat', code = 'SR', country_id = '100'");
+
+			$sul_barat_id = $this->db->getLastId();
+		}
+
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "city` WHERE zone_id = '" . (int)$sul_barat_id . "'");
+
+		if (!$query->num_rows) {
+			$this->db->query(
+				"INSERT INTO `" . DB_PREFIX . "city` (`zone_id`, `name`, `status`) VALUES
 				(" . $sul_barat_id . ", 'Kab. Mamaju', 1),
 				(" . $sul_barat_id . ", 'Kab. Majene', 1),
 				(" . $sul_barat_id . ", 'Kab. Mamuju Utara', 1),
