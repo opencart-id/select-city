@@ -14,6 +14,6 @@ Installation
 
 1. Extract the downloaded zip file.
 2. Upload `admin`, `catalog`, and `vqmod` folders into your Opencart root directory (mostly from `/public_html/` folder)
-3. Grant a permission to `localisation/city` (*check this link: http://forum.opencart.com/viewtopic.php?f=144&t=30720 *)
+3. Grant a permission to `localisation/city` (check this link: http://forum.opencart.com/viewtopic.php?f=144&t=30720)
 4. Go to Admin > System > Localisation > Cities
 5. Your database now will have `DB_PREFIX + city` table
