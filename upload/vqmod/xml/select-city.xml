@@ -876,6 +876,7 @@ $('select[name=\'zone_id\']').trigger('change');
 			<add><![CDATA[
   <br />
   <br />
+  <span class="required">*</span> <?php echo $entry_city; ?><br />
   <select name="city" class="large-field"><option value=""><?php echo $text_select; ?></option></select>
 			]]></add>
 		</operation>
