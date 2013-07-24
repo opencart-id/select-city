@@ -645,7 +645,7 @@ class ModelLocalisationCity extends Model {
 		}
 
 		// Kalimantan Utara zone
-		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "zone` WHERE name = 'Kalimantan Utara'");
+/*		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "zone` WHERE name = 'Kalimantan Utara'");
 
 		if ($query->num_rows) {
 			$kal_utara_id = $query->row['zone_id'];
@@ -666,7 +666,7 @@ class ModelLocalisationCity extends Model {
 				(" . $kal_utara_id . ", 'Kab. Tanah Tidung', 1),
 				(" . $kal_utara_id . ", 'Tarakan', 1);"
 			);
-		}
+		}*/
 
 		// Sulawesi Barat zone
 		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "zone` WHERE name = 'Sulawesi Barat'");
