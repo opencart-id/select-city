@@ -12,7 +12,7 @@ Requirements
 Installation
 ------------
 
-1. Ekstrak file zip yang telah di-download.
+1. Ekstrak file zip yang telah di-download
 2. Upload folder `admin`, `catalog`, dan `vqmod` ke dalam direktori Opencart (biasanya `/public_html/`)
 3. Beri permisi untuk `localisation/city` (lihat tautan berikut: http://forum.opencart.com/viewtopic.php?f=144&t=30720)
 4. Masuk ke Admin > System > Localisation > Cities
